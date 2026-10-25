@@ -1,0 +1,21 @@
+jenkins:
+  systemMessage: "Jenkins managed via Configuration as Code "
+  
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_USER}"
+          password: "${JENKINS_PASSWORD}" 
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+  numExecutors: 2
+  remotingSecurity:
+    enabled: true
+
+unclassified:
+  location:
+    url: "http://jenkins-master:8080/"

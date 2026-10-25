@@ -1,0 +1,36 @@
+services:
+  jenkins-master:
+    build: ./jenkins-server
+    container_name: jenkins_server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - ./jenkins.yaml:/var/jenkins_home/jenkins.yaml
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/login || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/jenkins.yaml
+      - JENKINS_USER=${JENKINS_USER}
+      - JENKINS_PASSWORD=${JENKINS_PASSWORD}
+
+
+  jenkins-agent:
+    build: ./jenkins-agent
+    container_name: jenkins_agents
+    depends_on: 
+      jenkins-master:
+        condition: service_healthy
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080/
+      - JENKINS_NAME=${JENKINS_AGENT_NAME}
+      - JENKINS_SECRET=${JENKINS_AGENT_SECRET}
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
