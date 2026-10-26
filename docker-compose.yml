@@ -33,5 +33,8 @@ services:
     restart: unless-stopped
     volumes:
       - /run/user/66902/docker.sock:/var/run/docker.sock
+    user: "${UID}:${GID}"
+    # group_add:
+    #   - "66902"
 volumes:
   jenkins_home:
