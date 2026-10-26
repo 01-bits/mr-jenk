@@ -1,40 +1,39 @@
 services:
   jenkins-master:
-    build: ./jenkins-server
+    build:
+      context: .
+      dockerfile: jenkins-server/Dockerfile
     container_name: jenkins_server
-    restart: unless-stopped
     environment:
-      - CASC_JENKINS_CONFIG=/var/jenkins_home/jenkins.yaml
-      - JENKINS_USER=${JENKINS_USER}
-      - JENKINS_PASSWORD=${JENKINS_PASSWORD}
+      - JENKINS_ADMIN_USERNAME=${JENKINS_ADMIN_USERNAME}
+      - JENKINS_ADMIN_PASSWORD=${JENKINS_ADMIN_PASSWORD}
+      - JENKINS_AGENT_USERNAME=${JENKINS_AGENT_USERNAME}
+      - JENKINS_AGENT_PASSWORD=${JENKINS_AGENT_PASSWORD}
+    restart: unless-stopped
     ports:
       - "8080:8080"
-      - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
       - ./jenkins.yaml:/var/jenkins_home/jenkins.yaml
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080/login || exit 1" ]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-
   jenkins-agent:
     build: ./jenkins-agent
     container_name: jenkins_agents
-    depends_on: 
+    depends_on:
       jenkins-master:
         condition: service_healthy
     environment:
-      - JENKINS_URL=http://jenkins-master:8080/
-      - JENKINS_NAME=${JENKINS_AGENT_NAME}
-      - JENKINS_SECRET=${JENKINS_AGENT_SECRET}
+      - JENKINS_URL=${JENKINS_MASTER_HOST}
+      - JENKINS_AGENT_NAME=${JENKINS_AGENT_NAME}
+      - JENKINS_AGENT_USERNAME=${JENKINS_AGENT_USERNAME}
+      - JENKINS_AGENT_PASSWORD=${JENKINS_AGENT_PASSWORD}
     restart: unless-stopped
     volumes:
-      - /run/user/66902/docker.sock:/var/run/docker.sock
-    user: "${UID}:${GID}"
-    # group_add:
-    #   - "66902"
+      - ${ACTIVE_SOCK}:/var/run/docker.sock
 volumes:
   jenkins_home:

@@ -16,3 +16,6 @@ RUN    apt-get update && apt-get install -y docker-ce-cli && \
 
 
 USER jenkins
+
+COPY agent.sh agent.sh
+ENTRYPOINT [ "./agent.sh" ]
