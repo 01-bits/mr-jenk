@@ -5,10 +5,10 @@ services:
       dockerfile: jenkins-server/Dockerfile
     container_name: jenkins_server
     environment:
-      - JENKINS_ADMIN_USERNAME=${JENKINS_ADMIN_USERNAME}
-      - JENKINS_ADMIN_PASSWORD=${JENKINS_ADMIN_PASSWORD}
-      - JENKINS_AGENT_USERNAME=${JENKINS_AGENT_USERNAME}
-      - JENKINS_AGENT_PASSWORD=${JENKINS_AGENT_PASSWORD}
+      - JENKINS_ADMIN_USERNAME=${JENKINS_ADMIN_USERNAME:?}
+      - JENKINS_ADMIN_PASSWORD=${JENKINS_ADMIN_PASSWORD:?}
+      - JENKINS_AGENT_USERNAME=${JENKINS_AGENT_USERNAME:?}
+      - JENKINS_AGENT_PASSWORD=${JENKINS_AGENT_PASSWORD:?}
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -28,12 +28,12 @@ services:
       jenkins-master:
         condition: service_healthy
     environment:
-      - JENKINS_URL=${JENKINS_MASTER_HOST}
-      - JENKINS_AGENT_NAME=${JENKINS_AGENT_NAME}
-      - JENKINS_AGENT_USERNAME=${JENKINS_AGENT_USERNAME}
-      - JENKINS_AGENT_PASSWORD=${JENKINS_AGENT_PASSWORD}
+      - JENKINS_URL=${JENKINS_URL:?}
+      - JENKINS_AGENT_NAME=${JENKINS_AGENT_NAME:?}
+      - JENKINS_AGENT_USERNAME=${JENKINS_AGENT_USERNAME:?}
+      - JENKINS_AGENT_PASSWORD=${JENKINS_AGENT_PASSWORD:?}
     restart: unless-stopped
     volumes:
-      - ${ACTIVE_SOCK}:/var/run/docker.sock
+      - ${ACTIVE_SOCK:?}:/var/run/docker.sock
 volumes:
   jenkins_home:
