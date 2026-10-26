@@ -1,7 +1,7 @@
 jenkins:
   systemMessage: "Jenkins managed via Configuration as Code"
   numExecutors: 0
-  
+
   securityRealm:
     local:
       allowsSignup: false
@@ -19,7 +19,7 @@ jenkins:
       roles:
         global:
           - name: "admin"
-            permissions: 
+            permissions:
               - "Overall/Administer"
             entries:
               - user: "${JENKINS_ADMIN_USERNAME}"
@@ -38,6 +38,39 @@ jenkins:
         remoteFS: "/home/jenkins/agent"
         launcher: inbound
         numExecutors: 2
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: github-creds
+              username: ${GITHUB_USER}
+              password: ${GITHUB_TOKEN}
+              description: GitHub PAT
+
+jobs:
+  - script: >
+      pipelineJob('buy-01') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('${REPO_URL}')
+                  credentials('github-creds')
+                }
+                branches('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+          }
+        }
+        triggers {
+          githubPush()
+        }
+      }
 
 unclassified:
   location:
