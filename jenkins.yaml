@@ -1,5 +1,6 @@
 jenkins:
-  systemMessage: "Jenkins managed via Configuration as Code "
+  systemMessage: "Jenkins managed via Configuration as Code"
+  numExecutors: 0  # Résout l'avertissement de sécurité du nœud principal
   
   securityRealm:
     local:
@@ -8,13 +9,27 @@ jenkins:
         - id: "${JENKINS_USER}"
           password: "${JENKINS_PASSWORD}" 
 
+  remotingSecurity:
+    enabled: true
+
   authorizationStrategy:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false
 
-  numExecutors: 2
-  remotingSecurity:
-    enabled: true
+  nodes:
+    - permanent:
+        name: "${JENKINS_AGENT_NAME}"
+        remoteFS: "/home/jenkins/agent"
+        numExecutors: 2
+        labelString: "docker-agent"
+        mode: "NORMAL"
+        launcher:
+          inbound: 
+            workDirSettings:
+              disabled: true
+              failIfWorkDirIsMissing: false
+              internalDir: "remoting"
+              workDirPath: "/tmp"
 
 unclassified:
   location:
