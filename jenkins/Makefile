@@ -1,10 +1,11 @@
 DC = docker compose
 SERVICES = --remove-orphans
 SET_SOCKET_FILE= scripts/get-socket.sh
+NGROK= scripts/setup_ngrok.sh
 
 RUN = . $(SET_SOCKET_FILE) && $(DC)
 
-.PHONY: up down restart build logs ps clean
+.PHONY: up down restart build logs ps clean ngrok
 
 up:
 	$(RUN) up -d $(SERVICES)
@@ -25,3 +26,6 @@ ps:
 
 clean:
 	$(RUN) down -v --rmi local $(SERVICES)
+
+ngrok:
+	$(NGROK)

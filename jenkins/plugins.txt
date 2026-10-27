@@ -5,3 +5,4 @@ job-dsl
 role-strategy
 workflow-aggregator
 workflow-multibranch
+github
