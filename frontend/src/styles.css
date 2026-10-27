@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --brand-orange: #ff6600;
+  --brand-orange-hover: #e65c00;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-card: #ffffff;
+  --border-color: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --color-brand-dark: var(--text-primary);
+  --color-brand-gray: var(--text-secondary);
+  --surface-raised: #ffffff;
+  --surface-muted: #f3f4f6;
+  --surface-subtle: #f9fafb;
+  --border-subtle: #e5e7eb;
+}
+
+.dark {
+  --brand-orange: #ff7711;
+  --brand-orange-hover: #ff8822;
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --border-color: #334155;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --color-brand-dark: var(--text-primary);
+  --color-brand-gray: var(--text-secondary);
+  --surface-raised: #172033;
+  --surface-muted: #202c42;
+  --surface-subtle: #111a2b;
+  --border-subtle: #2a3850;
+}
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-hover: var(--brand-orange-hover);
+  --color-app-bg: var(--bg-primary);
+  --color-app-card: var(--bg-card);
+  --color-app-border: var(--border-color);
+  --color-app-text: var(--text-primary);
+  --color-app-muted: var(--text-secondary);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.25s ease, color 0.25s ease;
+  margin: 0;
+}
+
+/* Covers Tailwind utilities while component styles use the same palette. */
+.dark { color-scheme: dark; }
+.dark .bg-white, .dark .bg-white\/80, .dark .bg-white\/90 { background-color: rgb(23 32 51 / 0.9) !important; }
+.dark .bg-gray-50, .dark .bg-gray-100, .dark .bg-\[\#fafafa\] { background-color: var(--surface-subtle) !important; }
+.dark .bg-gray-200 { background-color: #2a3850 !important; }
+.dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: var(--border-subtle) !important; }
+.dark .text-gray-900, .dark .text-gray-800, .dark .text-gray-700, .dark .text-brand-dark { color: var(--text-primary) !important; }
+.dark .text-gray-600, .dark .text-gray-500, .dark .text-gray-400, .dark .text-brand-gray { color: var(--text-secondary) !important; }
+.dark input, .dark textarea, .dark select { color: var(--text-primary); background-color: var(--surface-muted); border-color: var(--border-subtle); }
+.dark input::placeholder, .dark textarea::placeholder { color: #71809a; }
+.dark .hover\:bg-gray-50:hover, .dark .hover\:bg-gray-100:hover { background-color: var(--surface-muted) !important; }
+.dark .hover\:text-brand-dark:hover { color: var(--text-primary) !important; }
+.dark .ring-gray-100 { --tw-ring-color: #2a3850 !important; }
+.dark ::selection { color: #fff; background: var(--brand-orange); }

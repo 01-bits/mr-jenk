@@ -1,0 +1,81 @@
+<section
+  class="relative min-h-[calc(100vh-73px)] bg-[#fafafa] overflow-hidden flex items-center justify-center px-6 lg:px-16 py-12"
+>
+  <!-- Background Typography / Design Element -->
+  <div
+    class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 select-none pointer-events-none z-0 opacity-5 flex items-center justify-center"
+  >
+    <span class="text-[22vw] font-black tracking-widest text-[var(--color-brand-dark)] uppercase"
+      >SLICK</span
+    >
+  </div>
+
+  <div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+    <!-- Left Column: Titles & Actions -->
+    <div class="lg:col-span-6 flex flex-col items-start space-y-6">
+      <h1
+        class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[var(--color-brand-dark)] leading-[1.05]"
+      >
+        Find Your <br />
+        <span class="text-[var(--color-brand-orange)]">Sole Mate</span> <br />
+        With Us
+      </h1>
+
+      <p
+        class="text-[var(--color-brand-gray)] text-base sm:text-lg max-w-md font-normal leading-relaxed"
+      >
+        Step into ultimate comfort and unmatched streetwear style. Discover handpicked sneakers
+        engineered to turn heads wherever you walk.
+      </p>
+
+      <div class="flex items-center space-x-4">
+        <button routerLink="/products"
+          class="bg-[var(--color-brand-orange)] text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-orange-500/20 hover:bg-[var(--color-brand-orange-hover)] transition-all transform hover:-translate-y-0.5 cursor-pointer"
+        >
+          Shop Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Column: Product Showcase -->
+    <div class="lg:col-span-6 relative flex flex-col items-center justify-center">
+      <!-- Decorative Background Circle with Orange Accent -->
+      <div
+        class="absolute w-[340px] h-[340px] sm:w-[420px] sm:h-[420px] rounded-full border border-orange-200/60 flex items-center justify-center pointer-events-none z-0"
+      >
+        <div
+          class="w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] rounded-full border border-orange-100/60 bg-orange-50/30"
+        ></div>
+      </div>
+
+      <!-- Sneaker Image Container -->
+      <!-- <div class="relative z-10 w-full max-w-lg flex justify-center py-6">
+        <img
+          src="https://images.pexels.com/photos/17825341/pexels-photo-17825341.jpeg"
+          alt="PUMA FlexFlare Sneakers"
+          class="w-full h-auto object-contain drop-shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-500"
+        />
+      </div> -->
+            <div class="relative spadri z-10">
+        <img
+          src="images/spadri.png"
+          alt="PUMA FlexFlare Sneakers"
+          class="w-full h-auto object-contain drop-shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-500"
+        />
+      </div>
+
+      <!-- Product Details Card -->
+      <div
+        class="relative z-10 text-center bg-white/80 backdrop-blur-md px-6 py-3 rounded-2xl shadow-sm border border-gray-100"
+      >
+        <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-orange)]"
+          >Featured Release</span
+        >
+        <h3 class="text-xl font-bold text-[var(--color-brand-dark)] mt-0.5">Trendy Slick Pro</h3>
+        <p class="text-[var(--color-brand-dark)] font-extrabold mt-1 text-lg">
+          3999.00 <span class="text-[var(--color-brand-orange)]">MAD</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

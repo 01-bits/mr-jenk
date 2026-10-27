@@ -1,0 +1,806 @@
+{
+  "info": {
+    "_postman_id": "04a0132f-5b50-4902-a2b2-0b6ebc4a0f10",
+    "name": "Buy-01 — Gateway E2E",
+    "description": "End-to-end Product and Media API tests through API Gateway. Login requests store JWTs; protected requests send explicit Bearer tokens. No X-User-Id or X-User-Role headers are sent by the client.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "gateway_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "seller1_email",
+      "value": "seller1@example.com"
+    },
+    {
+      "key": "seller1_password",
+      "value": "Seller1Password!"
+    },
+    {
+      "key": "seller2_email",
+      "value": "seller2@example.com"
+    },
+    {
+      "key": "seller2_password",
+      "value": "Seller2Password!"
+    },
+    {
+      "key": "client1_email",
+      "value": "client1@example.com"
+    },
+    {
+      "key": "client1_password",
+      "value": "Client1Password!"
+    },
+    {
+      "key": "seller1_token",
+      "value": ""
+    },
+    {
+      "key": "seller2_token",
+      "value": ""
+    },
+    {
+      "key": "client1_token",
+      "value": ""
+    },
+    {
+      "key": "product_id",
+      "value": ""
+    },
+    {
+      "key": "image_id",
+      "value": ""
+    },
+    {
+      "key": "avatar_id",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const requestName = pm.info.requestName || '';",
+          "const expected = requestName.match(/-> (\\d{3})$/);",
+          "",
+          "if (expected) {",
+          "  pm.test(`Status ${expected[1]}`, function () {",
+          "    pm.response.to.have.status(Number(expected[1]));",
+          "  });",
+          "}",
+          "",
+          "if (pm.response.code === 201) {",
+          "  const body = pm.response.json();",
+          "",
+          "  if (requestName.startsWith('Create product')) {",
+          "    pm.collectionVariables.set('product_id', body.id);",
+          "  }",
+          "",
+          "  if (requestName.startsWith('Upload product image')) {",
+          "    pm.collectionVariables.set('image_id', body.id);",
+          "  }",
+          "",
+          "  if (requestName.startsWith('Upload avatar')) {",
+          "    pm.collectionVariables.set('avatar_id', body.id);",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Authentication",
+      "item": [
+        {
+          "name": "Register seller1 -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Seller One\",\"email\":\"{{seller1_email}}\",\"password\":\"{{seller1_password}}\",\"role\":\"SELLER\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/auth/register"
+          }
+        },
+        {
+          "name": "Register seller2 -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Seller Two\",\"email\":\"{{seller2_email}}\",\"password\":\"{{seller2_password}}\",\"role\":\"SELLER\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/auth/register"
+          }
+        },
+        {
+          "name": "Register client1 -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Client One\",\"email\":\"{{client1_email}}\",\"password\":\"{{client1_password}}\",\"role\":\"CLIENT\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/auth/register"
+          }
+        },
+        {
+          "name": "Login seller1 -> 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const token = body.accessToken || body.token || body.access_token;",
+                  "",
+                  "pm.test('Seller1 JWT exists', function () {",
+                  "  pm.expect(token, 'Expected accessToken, token, or access_token').to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('seller1_token', token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{seller1_email}}\",\"password\":\"{{seller1_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Login seller2 -> 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const token = body.accessToken || body.token || body.access_token;",
+                  "",
+                  "pm.test('Seller2 JWT exists', function () {",
+                  "  pm.expect(token, 'Expected accessToken, token, or access_token').to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('seller2_token', token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{seller2_email}}\",\"password\":\"{{seller2_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Login client1 -> 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const token = body.accessToken || body.token || body.access_token;",
+                  "",
+                  "pm.test('Client1 JWT exists', function () {",
+                  "  pm.expect(token, 'Expected accessToken, token, or access_token').to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('client1_token', token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{client1_email}}\",\"password\":\"{{client1_password}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/auth/login"
+          }
+        },
+        {
+          "name": "My profile (seller1) -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/profile/me"
+          }
+        },
+        {
+          "name": "My profile no token -> 401",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/profile/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Product",
+      "item": [
+        {
+          "name": "Create product (seller1) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Shoes\",\"description\":\"Running shoes\",\"price\":49.9,\"quantity\":3}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/products"
+          }
+        },
+        {
+          "name": "Create product invalid price (seller1) -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Shoes\",\"price\":0,\"quantity\":3}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/products"
+          }
+        },
+        {
+          "name": "Create product (client1) -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{client1_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Shoes\",\"price\":10,\"quantity\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/products"
+          }
+        },
+        {
+          "name": "Create product no identity -> 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Shoes\",\"price\":10,\"quantity\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/products"
+          }
+        },
+        {
+          "name": "List products -> 200",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/products?page=0&size=20"
+          }
+        },
+        {
+          "name": "Get product -> 200",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/products/{{product_id}}"
+          }
+        },
+        {
+          "name": "Get missing product -> 404",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/products/doesnotexist"
+          }
+        },
+        {
+          "name": "Product owner -> 200",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/products/{{product_id}}/owner"
+          }
+        },
+        {
+          "name": "My products (seller1) -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/products/me"
+          }
+        },
+        {
+          "name": "My products (client1) -> 403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{client1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/products/me"
+          }
+        },
+        {
+          "name": "Update product (seller1) -> 200",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Shoes v2\",\"description\":\"Updated running shoes\",\"price\":55,\"quantity\":2}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/products/{{product_id}}"
+          }
+        },
+        {
+          "name": "Update product (seller2) -> 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller2_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Stolen\",\"price\":1,\"quantity\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{gateway_url}}/products/{{product_id}}"
+          }
+        },
+        {
+          "name": "Delete product (seller2) -> 404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller2_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/products/{{product_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Media",
+      "item": [
+        {
+          "name": "Upload product image (seller1) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "productId",
+                  "value": "{{product_id}}",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload image to another seller product (seller2) -> 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller2_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "productId",
+                  "value": "{{product_id}}",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload image without file (seller1) -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "productId",
+                  "value": "{{product_id}}",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload avatar (seller1) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload image (client1) -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{client1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload image no identity -> 401",
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}/media/images",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get image -> 200",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/media/images/{{image_id}}"
+          }
+        },
+        {
+          "name": "Get missing image -> 404",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/media/images/doesnotexist"
+          }
+        },
+        {
+          "name": "Images by products -> 200",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/media/images?productIds={{product_id}}&productIds=nope"
+          }
+        },
+        {
+          "name": "Images by products no parameter -> 400",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/media/images"
+          }
+        },
+        {
+          "name": "Product shows its images -> 200",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/products/{{product_id}}"
+          }
+        },
+        {
+          "name": "Delete image (seller2) -> 404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller2_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images/{{image_id}}"
+          }
+        },
+        {
+          "name": "Delete image (client1) -> 403",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{client1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images/{{image_id}}"
+          }
+        },
+        {
+          "name": "Delete image (seller1) -> 204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images/{{image_id}}"
+          }
+        },
+        {
+          "name": "Get image after delete -> 404",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/media/images/{{image_id}}"
+          }
+        },
+        {
+          "name": "Delete images of product (seller1) -> 204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/media/images?productId={{product_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Cleanup",
+      "item": [
+        {
+          "name": "Delete product (seller1) -> 204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller1_token}}"
+              }
+            ],
+            "url": "{{gateway_url}}/products/{{product_id}}"
+          }
+        },
+        {
+          "name": "Get deleted product -> 404",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/products/{{product_id}}"
+          }
+        },
+        {
+          "name": "Avatar remains available -> 200",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/media/images/{{avatar_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}

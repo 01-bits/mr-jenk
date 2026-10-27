@@ -1,0 +1,45 @@
+<div
+  class="fixed bottom-5 right-5 z-5000 flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4"
+>
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div
+      class="pointer-events-auto flex items-center justify-between p-4 rounded-xl shadow-xl border bg-white transition-all transform translate-y-0 duration-300 animate-slide-in"
+      [ngClass]="{
+        'border-brand-orange/30 shadow-orange-500/10':
+          toast.type === 'success' || toast.type === 'info',
+        'border-red-200 shadow-red-500/10': toast.type === 'error',
+      }"
+    >
+      <div class="flex items-center gap-3">
+        @if (toast.type === 'success') {
+          <div
+            class="w-8 h-8 rounded-lg bg-brand-orange/10 text-brand-orange flex items-center justify-center"
+          >
+            <div class="w-2.5 h-2.5 rounded-full bg-brand-orange animate-pulse"></div>
+          </div>
+        } @else if (toast.type === 'info') {
+          <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-500 flex items-center justify-center">
+            <div class="w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse"></div>
+          </div>
+        } @else if (toast.type === 'error') {
+          <div
+            class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center font-bold text-sm"
+          >
+            ✕
+          </div>
+        }
+
+        <p class="text-sm font-semibold text-gray-900 tracking-wide">
+          {{ toast.message }}
+        </p>
+      </div>
+
+      <button
+        (click)="toastService.remove(toast.id)"
+        class="text-gray-400 hover:text-brand-dark transition cursor-pointer p-1 text-sm"
+      >
+        ✕
+      </button>
+    </div>
+  }
+</div>

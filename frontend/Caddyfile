@@ -1,0 +1,26 @@
+localhost:8080 {
+	# Set web root directory for the built SPA
+	root * /usr/share/caddy
+
+	# Enable gzip compression
+	encode gzip
+
+	# Limit maximum request body size
+	request_body {
+		max_size 12MB
+	}
+
+	# Proxy /api/ requests to your backend gateway
+	handle_path /api/* {
+		reverse_proxy http://api-gateway:8080 {
+			header_up -X-User-Id
+			header_up -X-User-Role
+		}
+	}
+
+	# SPA routing: Serve static files, fallback to index.html
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}

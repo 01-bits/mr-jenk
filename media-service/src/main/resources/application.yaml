@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: ${MEDIA_SERVICE_NAME:media-service}
+  mongodb:
+    uri: ${MEDIA_MONGO_URI}
+  data:
+    mongodb:
+      auto-index-creation: true
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 11MB
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 1000
+            readTimeout: 2000
+  
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+server:
+  port: ${MEDIA_SERVICE_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+auth:
+  user-id-header: ${AUTH_USER_ID_HEADER:X-User-Id}
+  user-role-header: ${AUTH_USER_ROLE_HEADER:X-User-Role}
+
+media:
+  storage:
+    endpoint: ${MEDIA_STORAGE_ENDPOINT}
+    access-key: ${MEDIA_STORAGE_ROOT_USER}
+    secret-key: ${MEDIA_STORAGE_ROOT_PASSWORD}
+    bucket: ${MEDIA_STORAGE_BUCKET:media-bucket}
+    region: us-east-1
+
+springdoc:
+  open-api:
+    servers:
+      - url: /
+        description: API Gateway

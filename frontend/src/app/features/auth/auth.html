@@ -1,0 +1,24 @@
+<div class="min-h-screen flex items-center justify-center p-4 bg-gray-100">
+  <!-- Carte principale contenant le design global -->
+  <div class="bg-white w-full max-w-4xl rounded-2xl shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+    
+    <!-- Colonne Gauche : Image / Illustration (Fixe pour le module Auth) -->
+    <div class="relative bg-gray-900 flex items-center justify-center overflow-hidden min-h-[350px] md:min-h-[500px]">
+      <img 
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLxsgzv1At8nR4t4zIHD8P1dh9CfaGmVxyQnPXCQVGlAYaRgYF7j7R3SYi&s=10" 
+        alt="Sneaker Illustration" 
+        class="absolute inset-w-full h-full object-cover opacity-80"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+      <div class="absolute bottom-6 left-6 text-white font-bold text-xl tracking-wider">
+        PUMA <span class="text-orange-500">.</span>
+      </div>
+    </div>
+
+    <!-- Colonne Droite : Contenu Dynamique (Login / Register via router-outlet) -->
+    <div class="p-8 flex flex-col justify-center">
+      <router-outlet></router-outlet>
+    </div>
+
+  </div>
+</div>

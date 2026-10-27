@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: user-service
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 11MB
+  config:
+    import:
+    - optional:file:../.env[.properties]
+ 
+  mongodb:
+    uri: mongodb://${USERDB_USERNAME}:${USERDB_PASSWORD}@${USERDB_HOST}:27017/${USERDB_NAME}?authSource=admin
+server:
+  port: 8080
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+    
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+
+springdoc:
+  open-api:
+    servers:
+      - url: /
+        description: API Gateway

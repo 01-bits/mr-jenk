@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: api-gateway
+
+  config:
+    import:
+      - optional:file:../.env[.properties]
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: lb://${USER_SERVICE_NAME:user-service}
+              predicates:
+                - Path=/profile/me,/auth/**
+
+            - id: user-service-docs
+              uri: lb://${USER_SERVICE_NAME:user-service}
+              predicates:
+                - Path=/v3/api-docs/user-service
+              filters:
+              - RewritePath=/v3/api-docs/user-service, /v3/api-docs
+
+
+            - id: product-service
+              uri: lb://${PRODUCT_SERVICE_NAME:product-service}
+              predicates:
+                - Path=/products/**
+            
+            - id: product-service-docs
+              uri: lb://${PRODUCT_SERVICE_NAME:product-service}
+              predicates:
+                - Path=/v3/api-docs/product-service
+              filters:
+              - RewritePath=/v3/api-docs/product-service, /v3/api-docs
+
+            - id: media-service
+              uri: lb://${MEDIA_SERVICE_NAME:media-service}
+              predicates:
+                - Path=/media/**
+
+            - id: media-service-docs
+              uri: lb://${MEDIA_SERVICE_NAME:media-service}
+              predicates:
+                - Path=/v3/api-docs/media-service
+              filters:
+                - RewritePath=/v3/api-docs/media-service, /v3/api-docs
+
+
+server:
+  port: ${API_GATEWAY_PORT:8080}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+springdoc:
+  swagger-ui:
+    enabled: false
+    urls:
+      - name: Product Service
+        url: /v3/api-docs/product-service
+      - name: Media Service
+        url: /v3/api-docs/media-service
+
+scalar:
+  enabled: true
+  path: /scalar
+  sources:
+    - url: /v3/api-docs/user-service
+      title: User Service
+      slug: user-service
+      default: true
+    - url: /v3/api-docs/product-service
+      title: Product Service
+      slug: product-service
+    - url: /v3/api-docs/media-service
+      title: Media Service
+      slug: media-service

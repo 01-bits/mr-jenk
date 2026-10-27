@@ -1,0 +1,66 @@
+<section class="product-container">
+  <h2 class="page-title">Product Catalog</h2>
+
+  <div class="product-grid">
+    @for (product of products(); track product.id) {
+    <article class="product-card">
+      <div class="product-media">
+        @if (product.imageUrls && product.imageUrls.length > 0) {
+        <div class="p-media-slider">
+          @if (product.imageUrls.length > 1) {
+          <button title="prev" type="button" class="slide-arrow prev" (click)="prevMedia(product)">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button title="next" type="button" class="slide-arrow next" (click)="nextMedia(product)">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          }
+
+          <div class="slider-content">
+            <img title="Product Image" [src]="getMediaUrl(product.imageUrls[product.currentMediaIndex || 0])"
+              [alt]="product.name" class="slider-media" />
+          </div>
+
+          @if (product.imageUrls.length > 1) {
+          <div class="slider-indicators">
+            @for (med of product.imageUrls; track $index) {
+            <span class="dot" [class.active]="(product.currentMediaIndex || 0) === $index"></span>
+            }
+          </div>
+          }
+        </div>
+        } @else {
+        <img class="no-image" src="images/noProductImage.png" alt="No product image available" />
+        }
+      </div>
+
+      <div class="product-info">
+        <h3 class="product-name line-clamp-1 break-words" [title]="product.name">{{ product.name }}</h3>
+        <p class="product-description line-clamp-1 break-words" [title]="product.description">
+          {{ product.description || 'No description available.' }}
+        </p>
+        <div class="product-footer">
+          <span class="stock" [class.out]="product.quantity === 0"
+            [class.low]="product.quantity > 0 && product.quantity <= 5">
+            @if (product.quantity === 0) { Out of stock } @else { Stock: {{ product.quantity }} }
+          </span>
+          <span class="price-badge">{{ product.price }}$</span>
+        </div>
+      </div>
+    </article>
+    }
+  </div>
+</section>
+
+@if (isLoading) {
+<div class="loading-spinner">
+  <div class="spinner"></div>
+  <span>Loading products...</span>
+</div>
+}
+
+@if (products().length === 0 && !isLoading) {
+<div class="no-posts-message">
+  <p>No products available.</p>
+</div>
+}

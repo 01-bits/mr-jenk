@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: ${PRODUCT_SERVICE_NAME:product-service}
+  mongodb:
+    uri: ${PRODUCT_MONGO_URI}
+  data:
+    mongodb:
+      auto-index-creation: true
+    web:
+      pageable:
+        max-page-size: 100
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 1000
+            readTimeout: 2000
+    
+    
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+server:
+  port: ${PRODUCT_SERVICE_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+auth:
+  user-id-header: ${AUTH_USER_ID_HEADER:X-User-Id}
+  user-role-header: ${AUTH_USER_ROLE_HEADER:X-User-Role}
+
+springdoc:
+  open-api:
+    servers:
+      - url: /
+        description: API Gateway

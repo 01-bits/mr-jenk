@@ -1,0 +1,191 @@
+services:
+  # ---------- Object storage ----------
+  media-storage:
+    image: pgsty/silo:RELEASE.2026-08-06T00-00-00Z
+    container_name: media-storage
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MEDIA_STORAGE_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MEDIA_STORAGE_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 1s
+
+  # ---------- Databases ----------
+  user-mongo:
+    image: mongo:7
+    container_name: user-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${USERDB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${USERDB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${USERDB_NAME}
+    volumes:
+      - user-mongo_data:/data/db
+    healthcheck:
+      test:
+        ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  product-mongo:
+    image: mongo:7
+    container_name: product-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${PRODUCT_MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${PRODUCT_MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${PRODUCT_MONGO_DATABASE}
+    volumes:
+      - product_mongo_data:/data/db
+    healthcheck:
+      test:
+        ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  media-mongo:
+    image: mongo:7
+    container_name: media-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MEDIA_MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MEDIA_MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MEDIA_MONGO_DATABASE}
+    volumes:
+      - media_mongo_data:/data/db
+    healthcheck:
+      test:
+        ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ---------- Services ----------
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    depends_on:
+      user-mongo:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    environment:
+      AUTH_USER_ID_HEADER: ${AUTH_USER_ID_HEADER}
+      AUTH_USER_ROLE_HEADER: ${AUTH_USER_ROLE_HEADER}
+      secret_key: ${secret_key}
+      USERDB_HOST: ${USERDB_HOST}
+      USERDB_USERNAME: ${USERDB_USERNAME}
+      USERDB_PASSWORD: ${USERDB_PASSWORD}
+      USERDB_NAME: ${USERDB_NAME}
+      EUREKA_URL: ${EUREKA_URL}
+      USER_SERVICE_PORT: ${USER_SERVICE_PORT}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    depends_on:
+      product-mongo:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    environment:
+      PRODUCT_SERVICE_NAME: ${PRODUCT_SERVICE_NAME}
+      EUREKA_URL: ${EUREKA_URL}
+      PRODUCT_MONGO_URI: ${PRODUCT_MONGO_URI}
+      AUTH_USER_ID_HEADER: ${AUTH_USER_ID_HEADER}
+      AUTH_USER_ROLE_HEADER: ${AUTH_USER_ROLE_HEADER}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  media-service:
+    build: ./media-service
+    container_name: media-service
+    depends_on:
+      media-mongo:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      media-storage:
+        condition: service_healthy
+    environment:
+      MEDIA_SERVICE_NAME: ${MEDIA_SERVICE_NAME}
+      EUREKA_URL: ${EUREKA_URL}
+      MEDIA_MONGO_URI: ${MEDIA_MONGO_URI}
+      MEDIA_STORAGE_ENDPOINT: ${MEDIA_STORAGE_ENDPOINT}
+      MEDIA_STORAGE_ROOT_USER: ${MEDIA_STORAGE_ROOT_USER}
+      MEDIA_STORAGE_ROOT_PASSWORD: ${MEDIA_STORAGE_ROOT_PASSWORD}
+      MEDIA_STORAGE_BUCKET: ${MEDIA_STORAGE_BUCKET}
+      AUTH_USER_ID_HEADER: ${AUTH_USER_ID_HEADER}
+      AUTH_USER_ROLE_HEADER: ${AUTH_USER_ROLE_HEADER}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    environment:
+      AUTH_USER_ID_HEADER: ${AUTH_USER_ID_HEADER}
+      AUTH_USER_ROLE_HEADER: ${AUTH_USER_ROLE_HEADER}
+      secret_key: ${secret_key}
+      EUREKA_URL: ${EUREKA_URL}
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT}
+      USER_SERVICE_NAME: ${USER_SERVICE_NAME}
+      PRODUCT_SERVICE_NAME: ${PRODUCT_SERVICE_NAME}
+      MEDIA_SERVICE_NAME: ${MEDIA_SERVICE_NAME}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    depends_on:
+      - api-gateway
+    ports:
+      - "4200:8080"
+
+volumes:
+  user-mongo_data:
+  product_mongo_data:
+  media_mongo_data:
+  minio_data:
