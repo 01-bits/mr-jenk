@@ -57,23 +57,28 @@ credentials:
 
 jobs:
   - script: >
-      pipelineJob('buy-01') {
-        definition {
-          cpsScm {
-            scm {
-              git {
-                remote {
-                  url('${REPO_URL}')
-                  credentials('github-creds')
-                }
-                branches('*/main')
-              }
-            }
+      multibranchPipelineJob('mr-jenk') {
+        branchSources {
+          github {
+            id('mr-jenk-github')
+            repoOwner('01-bits')
+            repository('mr-jenk')
+            scanCredentialsId('github-creds')
+            buildForkPRMerge(true)
+            buildOriginPRMerge(true)
+          }
+        }
+
+        factory {
+          workflowBranchProjectFactory {
             scriptPath('Jenkinsfile')
           }
         }
-        triggers {
-          githubPush()
+
+        orphanedItemStrategy {
+          discardOldItems {
+            numToKeep(10)
+          }
         }
       }
 
