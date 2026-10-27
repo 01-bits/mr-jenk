@@ -6,3 +6,4 @@ role-strategy
 workflow-aggregator
 workflow-multibranch
 github
+dark-theme
