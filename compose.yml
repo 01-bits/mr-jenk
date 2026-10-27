@@ -71,7 +71,8 @@ services:
 
   # ---------- Services ----------
   discovery-service:
-    build: ./discovery-service
+    build: ./backend/discovery-service
+    image: discovery-service
     container_name: discovery-service
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
@@ -81,7 +82,8 @@ services:
       start_period: 5s
 
   user-service:
-    build: ./user-service
+    build: ./backend/user-service
+    image: user-service
     container_name: user-service
     depends_on:
       user-mongo:
@@ -106,7 +108,8 @@ services:
       start_period: 5s
 
   product-service:
-    build: ./product-service
+    build: ./backend/product-service
+    image: product-service
     container_name: product-service
     depends_on:
       product-mongo:
@@ -127,7 +130,8 @@ services:
       start_period: 5s
 
   media-service:
-    build: ./media-service
+    build: ./backend/media-service
+    image: media-service
     container_name: media-service
     depends_on:
       media-mongo:
@@ -154,8 +158,9 @@ services:
       start_period: 5s
 
   api-gateway:
-    build: ./api-gateway
+    build: ./backend/api-gateway
     container_name: api-gateway
+    image: api-gateway
     depends_on:
       discovery-service:
         condition: service_healthy
@@ -178,6 +183,7 @@ services:
 
   frontend:
     build: ./frontend
+    image: frontend
     container_name: frontend
     depends_on:
       - api-gateway
