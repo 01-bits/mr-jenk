@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                echo 'Hello World From mr-jink (tabramajit + brawl)!!! sdfsdfsdklfsdklfsdf'
+                echo 'Hello World From mr-jink (tabramajit + brawl)!!'
             }
         }
     }

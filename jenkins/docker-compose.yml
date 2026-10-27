@@ -12,6 +12,7 @@ services:
       - GITHUB_USER=${GITHUB_USERNAME:?}
       - GITHUB_USER=${GITHUB_TOKEN:?}
       - REPO_URL=${REPO_URL:?}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET:?}
     restart: unless-stopped
     ports:
       - "8080:8080"

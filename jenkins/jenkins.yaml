@@ -49,6 +49,11 @@ credentials:
               username: ${GITHUB_USER}
               password: ${GITHUB_TOKEN}
               description: GitHub PAT
+          - string:
+              scope: SYSTEM
+              id: github-webhook-secret
+              secret: ${GITHUB_WEBHOOK_SECRET}
+              description: GitHub webhook secret
 
 jobs:
   - script: >
@@ -75,3 +80,6 @@ jobs:
 unclassified:
   location:
     url: "http://jenkins-master:8080/"
+  gitHubPluginConfig:
+    hookSecretConfigs:
+      - credentialsId: github-webhook-secret
