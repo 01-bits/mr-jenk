@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                echo 'Hello World From mr-jinkinssssssssss4444 Test dddddddddd !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                echo 'Hello World From mr-jinkkkkkkkkkk'
                 sleep(10)
             }
         }
