@@ -59,13 +59,36 @@ jobs:
   - script: >
       multibranchPipelineJob('mr-jenk') {
         branchSources {
-          github {
-            id('mr-jenk-github')
-            repoOwner('01-bits')
-            repository('mr-jenk')
-            scanCredentialsId('github-creds')
-            buildForkPRMerge(true)
-            buildOriginPRMerge(true)
+          branchSource {
+            source {
+              github {
+                  id('mr-jenk-github')
+                  repoOwner('01-bits')
+                  repository('mr-jenk')
+                  credentialsId('github-creds')
+
+                  repositoryUrl('https://github.com/01-bits/mr-jenk')
+                  configuredByUrl(true)
+
+                  traits {
+                    // Discover branches; the filter below keeps only main
+                    gitHubBranchDiscovery {
+                        strategyId(3)
+                    }
+                    // Discover PRs from branches in the same repository
+                    // Test the proposed merge with the target branch
+                    gitHubPullRequestDiscovery {
+                      strategyId(1)
+                    }
+                    // Keep main and PR jobs, not develop/feature branch jobs
+                    headWildcardFilter {
+                      includes('main PR-*')
+                      excludes('')
+                    }
+
+                  }
+              }
+            }
           }
         }
 
