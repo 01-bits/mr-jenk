@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                echo 'Hello World From mr-jinkinssssssssss4444'
+                echo 'Hello World From mr-jinkinssssssssss4444 Test'
             }
         }
 
@@ -14,7 +14,7 @@ pipeline {
                 not { changeRequest() }
             }
             steps{
-                echo "I'm main branch!"
+                echo "I'm main branch!!!!!!!!!!!!!!!!!!!!!!!"
             }
         }
     }
