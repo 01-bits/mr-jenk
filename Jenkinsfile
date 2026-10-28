@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                echo 'test devlop'
+                echo 'test devlopgggggggggggg'
                 sleep(10)
             }
         }
@@ -15,7 +15,7 @@ pipeline {
                 not { changeRequest() }
             }
             steps{
-                echo "I'm main branch!!!!!!!!!!!!!!!!!!!!!!!"
+                echo "I'm main branch!"
             }
         }
     }
