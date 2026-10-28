@@ -14,7 +14,7 @@ pipeline {
                 not { changeRequest() }
             }
             steps{
-                echo "I'm main branch mmmm"
+                echo "I'm main branch!"
             }
         }
     }
