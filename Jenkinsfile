@@ -8,7 +8,12 @@ pipeline {
                 sleep(10)
             }
         }
-
+        stage('Build') {
+            steps {
+                echo 'raji::Fork + add changes in jenkis file like print'
+                echo 'Building...'
+            }
+        }
         stage('Deploy') {
             when{
                 branch 'main'
