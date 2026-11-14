@@ -16,6 +16,10 @@ spring:
           default:
             connectTimeout: 1000
             readTimeout: 2000
+  
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
     
     
 
