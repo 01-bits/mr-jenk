@@ -34,10 +34,14 @@ public class HeaderAuthFilter extends OncePerRequestFilter {
         String role = req.getHeader(roleHeader);
 
         if (userId != null && !userId.isBlank() && role != null && Role.valueOf(role.toUpperCase()) != null) {
-            Role roleEnum = Role.valueOf(role.toUpperCase());
-            var auth = new UsernamePasswordAuthenticationToken(
-                    userId, null, List.of(new SimpleGrantedAuthority(roleEnum.toAuthority())));
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            try {
+                Role roleEnum = Role.valueOf(role.trim().toUpperCase());
+                var auth = new UsernamePasswordAuthenticationToken(
+                        userId, null, List.of(new SimpleGrantedAuthority(roleEnum.toAuthority())));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            } catch (Exception e) {
+                // unknown role: leave the request unauthenticated
+            }
         }
         chain.doFilter(req, res);
     }
