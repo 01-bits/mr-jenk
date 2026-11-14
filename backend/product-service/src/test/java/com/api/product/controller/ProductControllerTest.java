@@ -7,6 +7,7 @@ import java.time.Instant;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,7 +37,7 @@ public class ProductControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean 
+    @MockitoBean
     private ProductService service;
 
     private ProductRequest request;
@@ -62,17 +64,24 @@ public class ProductControllerTest {
 
     }
 
-    // ----------- helpers --------------
+    // ---------- helpers ----------------
 
     private Page<ProductResponse> onePage() {
-        return new PageImpl<>(null)
+        return new PageImpl<>(List.of(response), PageRequest.of(0, 10), 1);
     }
+
+    // ---------- GET /products ----------
 
     @Test
     void list_shouldReturnPagedProductsWithoutAuthentication() throws Exception {
-        when(service.list(any(Pageable.class))).thenReturn(null);
+        when(service.list(any(Pageable.class))).thenReturn(onePage());
 
         mockMvc.perform(get("/products"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].id").value("product-1"))
+                .andExpect(jsonPath("$.content[0].name").value("Laptop"))
+                .andExpect(jsonPath("$.content[0].imageUrls[0]").value("https://media/img1.jpg"))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
     }
 }
