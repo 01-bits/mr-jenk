@@ -4,7 +4,9 @@ import java.util.List;
 
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -12,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -84,4 +88,38 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.content[0].imageUrls[0]").value("https://media/img1.jpg"))
                 .andExpect(jsonPath("$.page.totalElements").value(1));
     }
+
+    @Test
+    void list_shouldUseDefaultPagingWhenNoParamsGiven() throws Exception {
+        when(service.list(any(Pageable.class))).thenReturn(onePage());
+
+        mockMvc.perform(get("/products")).andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(service).list(captor.capture());
+
+        Pageable pageable = captor.getValue();
+        assertEquals(0, pageable.getPageNumber());
+        assertEquals(20, pageable.getPageSize());
+        assertEquals(Sort.Direction.DESC, pageable.getSort().getOrderFor("createdAt").getDirection());
+    }
+
+    @Test
+    void list_shouldPassRequestedPageAndCapSizeAtMax() throws Exception {
+        when(service.list(any(Pageable.class))).thenReturn(onePage());
+
+        mockMvc.perform(get("/products").param("page", "2").param("size", "500"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(service).list(captor.capture());
+
+        assertEquals(2, captor.getValue().getPageNumber());
+        // spring.data.web.pageable.max-page-size in application.yaml
+        
+        assertEquals(100, captor.getValue().getPageSize());
+    }
+
+    
+
 }
