@@ -8,6 +8,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.api.product.model.Role;
+
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +47,7 @@ public class MediaClient {
     /** Best effort: never fails the product deletion. */
     public void deleteImagesOf(String productId, String userId) {
         try {
-            api.deleteByProduct(productId, Map.of(userIdHeader, userId, roleHeader, "SELLER"));
+            api.deleteByProduct(productId, Map.of(userIdHeader, userId, roleHeader, Role.SELLER.name()));
         } catch (FeignException e) {
             log.warn("Could not delete images of product {}: {}", productId, e.getMessage());
         }

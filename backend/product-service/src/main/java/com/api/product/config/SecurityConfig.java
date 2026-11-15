@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpServletResponse;
  * SecurityConfig
  */
 @Configuration
-@EnableMongoAuditing
 public class SecurityConfig {
 
 	@Bean
