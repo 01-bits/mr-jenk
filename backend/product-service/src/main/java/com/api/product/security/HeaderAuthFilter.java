@@ -33,7 +33,7 @@ public class HeaderAuthFilter extends OncePerRequestFilter {
         String userId = req.getHeader(userIdHeader);
         String role = req.getHeader(roleHeader);
 
-        if (userId != null && !userId.isBlank() && role != null && Role.valueOf(role.toUpperCase()) != null) {
+        if (userId != null && !userId.isBlank() && role != null) {
             try {
                 Role roleEnum = Role.valueOf(role.trim().toUpperCase());
                 var auth = new UsernamePasswordAuthenticationToken(
