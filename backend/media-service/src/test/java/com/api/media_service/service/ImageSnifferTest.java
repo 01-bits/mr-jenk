@@ -1,4 +1,4 @@
-package com.buy_01.media_service.service;
+package com.api.media_service.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

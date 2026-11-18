@@ -1,4 +1,4 @@
-package com.buy_01.media_service;
+package com.api.media_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
