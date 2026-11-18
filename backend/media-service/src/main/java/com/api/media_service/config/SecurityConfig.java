@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,7 +20,6 @@ import jakarta.servlet.http.HttpServletResponse;
  * SecurityConfig
  */
 @Configuration
-@EnableMongoAuditing
 public class SecurityConfig {
 
 	@Bean

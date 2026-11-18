@@ -50,6 +50,15 @@ dependencyManagement {
 	}
 }
 
+
 tasks.named('test') {
 	useJUnitPlatform()
+
+	jvmArgs('-XX:+EnableDynamicAgentLoading')
+
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = true
+		exceptionFormat = "full"
+	}
 }
