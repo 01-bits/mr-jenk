@@ -1,6 +1,5 @@
 package com.buy01.user.services;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -20,8 +19,6 @@ import com.buy01.user.exception.DuplicateResourceException;
 import com.buy01.user.model.Role;
 import com.buy01.user.model.User;
 import com.buy01.user.repository.UserRepository;
-import com.buy01.user.services.AuthService;
-import com.buy01.user.services.JwtService;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
