@@ -359,7 +359,8 @@ public class MediaServiceTest {
                 () -> service.uploadAll(List.of(png("a.png")), null, "seller-1"));
 
         assertSame(dbDown, ex);
-        verify(storage).delete(savedKeys(1).get(0)); // no orphan file left in storage
+        String key = savedKeys(1).get(0);
+        verify(storage).delete(key); // no orphan file left in storage
     }
 
     @Test
