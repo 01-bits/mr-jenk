@@ -8,15 +8,18 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.buy01.user.model.Role;
+
 import org.springframework.beans.factory.annotation.Value;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 
-@Component
-
+@AllArgsConstructor 
 public class HeadersFilter extends OncePerRequestFilter {
 
     @Value("${AUTH_USER_ID_HEADER}")
@@ -32,18 +35,20 @@ public class HeadersFilter extends OncePerRequestFilter {
         String userId = request.getHeader(AUTH_USER_ID_HEADER);
         String userRole = request.getHeader(AUTH_USER_ROLE_HEADER);
 
-        if (userId == null || userRole == null) {
+        if (userId == null || userId.isBlank() || userRole == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_"+userRole));
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userId,
-                null,
-                authorities);
+        try {
+            Role role = Role.valueOf(userRole.trim().toUpperCase());
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (IllegalArgumentException e) {
+            // unknown role: continue unauthenticated, protected routes will answer 401
+        }
 
         filterChain.doFilter(request, response);
 
