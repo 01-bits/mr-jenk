@@ -1,20 +1,30 @@
 package com.api.media_service.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.ByteArrayInputStream;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -32,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.api.media_service.config.SecurityConfig;
 import com.api.media_service.dto.MediaResponse;
 import com.api.media_service.exception.InvalidMediaException;
+import com.api.media_service.exception.MediaNotFoundException;
 import com.api.media_service.exception.ProductNotFoundException;
 import com.api.media_service.exception.UpstreamUnavailableException;
 import com.api.media_service.model.Media;
@@ -196,10 +208,203 @@ public class MediaControllerTest {
                 .andExpect(jsonPath("$.message").value("Storage unavailable"));
     }
 
+    // =====================================================================
+    // GET /media/images/{id}
+    // =====================================================================
 
+    @Test
+    void get_shouldReturnImageWithCachingHeadersWithoutAuthentication() throws Exception {
+        when(service.metadata("media-1")).thenReturn(media);
+        when(service.content(media)).thenReturn(new ByteArrayInputStream(IMAGE_BYTES));
 
+        mockMvc.perform(get("/media/images/media-1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/png"))
+                .andExpect(content().bytes(IMAGE_BYTES))
+                .andExpect(header().string(HttpHeaders.CONTENT_LENGTH, "3"))
+                .andExpect(header().string(HttpHeaders.ETAG, "\"media-1\""))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "max-age=86400, public"))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "inline"));
+    }
 
+    @Test
+    void get_shouldReturn304AndNotLoadContentWhenEtagMatches() throws Exception {
+        when(service.metadata("media-1")).thenReturn(media);
 
-    
+        mockMvc.perform(get("/media/images/media-1").header(HttpHeaders.IF_NONE_MATCH, "\"media-1\""))
+                .andExpect(status().isNotModified())
+                .andExpect(content().string(""));
+
+        // the whole point of the 304: storage is never touched
+        verify(service, never()).content(any(Media.class));
+    }
+
+    @Test
+    void get_shouldReturn200WhenEtagDoesNotMatch() throws Exception {
+        when(service.metadata("media-1")).thenReturn(media);
+        when(service.content(media)).thenReturn(new ByteArrayInputStream(IMAGE_BYTES));
+
+        mockMvc.perform(get("/media/images/media-1").header(HttpHeaders.IF_NONE_MATCH, "\"other\""))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void get_shouldReturn404WhenMediaNotFound() throws Exception {
+        when(service.metadata("missing")).thenThrow(new MediaNotFoundException("missing"));
+
+        mockMvc.perform(get("/media/images/missing"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Media not found: missing"));
+    }
+
+    @Test
+    void get_shouldReturn503WhenStorageFails() throws Exception {
+        when(service.metadata("media-1")).thenReturn(media);
+        when(service.content(media)).thenThrow(new StorageException("Failed to read object media-1.png", null));
+
+        mockMvc.perform(get("/media/images/media-1"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.message").value("Storage unavailable"));
+    }
+
+    // =====================================================================
+    // GET /media/images?productIds=...
+    // =====================================================================
+
+    @Test
+    void byProducts_shouldReturnUrlsGroupedByProductWithoutAuthentication() throws Exception {
+        when(service.urlsByProduct(List.of("product-1", "product-2"))).thenReturn(Map.of(
+                "product-1", List.of("/media/images/media-1"),
+                "product-2", List.of()));
+
+        mockMvc.perform(get("/media/images")
+                .param("productIds", "product-1")
+                .param("productIds", "product-2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.product-1[0]").value("/media/images/media-1"))
+                .andExpect(jsonPath("$.product-2.length()").value(0));
+    }
+
+    @Test
+    void byProducts_shouldAcceptExactlyOneHundredIds() throws Exception {
+        List<String> ids = IntStream.range(0, 100).mapToObj(i -> "p" + i).toList();
+        when(service.urlsByProduct(ids)).thenReturn(Map.of());
+
+        mockMvc.perform(get("/media/images").param("productIds", ids.toArray(String[]::new)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void byProducts_shouldReturn400WhenMoreThanOneHundredIds() throws Exception {
+        List<String> ids = IntStream.range(0, 101).mapToObj(i -> "p" + 1).toList();
+        mockMvc.perform(get("/media/images").param("productIds", ids.toArray(String[]::new)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Too many product ids (max 100)"));
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void byProducts_shouldReturn400WhenProductIdsMissing() throws Exception {
+        mockMvc.perform(get("/media/images"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
+    }
+
+    // =====================================================================
+    // DELETE /media/images/{id}
+    // =====================================================================
+
+    @Test
+    void delete_shouldReturn204AndUseSellerIdFromHeader() throws Exception {
+        mockMvc.perform(asSeller(delete("/media/images/media-1")))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(service).delete("media-1", "seller-1");
+    }
+
+    @Test
+    void delete_shouldReturn404WhenMediaNotFoundOrNotOwned() throws Exception {
+        doThrow(new MediaNotFoundException("media-1")).when(service).delete("media-1", "seller-1");
+
+        mockMvc.perform(asSeller(delete("/media/images/media-1")))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Media not found: media-1"));
+    }
+
+    @Test
+    void delete_shouldReturn401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(delete("/media/images/media-1"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void delete_shouldReturn403ForClientRole() throws Exception {
+        mockMvc.perform(asClient(delete("/media/images/media-1")))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(service);
+    }
+
+    // =====================================================================
+    // DELETE /media/images?productId=...
+    // =====================================================================
+
+    @Test
+    void deleteByProduct_shouldReturn204AndUseSellerIdFromHeader() throws Exception {
+        mockMvc.perform(asSeller(delete("/media/images").param("productId", "product-1")))
+                .andExpect(status().isNoContent());
+
+        verify(service).deleteByProduct("product-1", "seller-1");
+    }
+
+    @Test
+    void deleteByProduct_shouldReturn400WhenProductIdMissing() throws Exception {
+        mockMvc.perform(asSeller(delete("/media/images")))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void deleteByProduct_shouldReturn401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(delete("/media/images").param("productId", "product-1"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void deleteByProduct_shouldReturn403ForClientRole() throws Exception {
+        mockMvc.perform(asClient(delete("/media/images").param("productId", "product-1")))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(service);
+    }
+
+    // =====================================================================
+    // everything else
+    // =====================================================================
+
+    @Test
+    void unknownRoute_shouldBeDeniedEvenForSeller() throws Exception {
+        mockMvc.perform(asSeller(put("/media/images/media-1")))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void unexpectedError_shouldReturn500WithoutLeakingDetails() throws Exception {
+        when(service.metadata("media-1")).thenThrow(new IllegalStateException("mongo password is hunter2"));
+
+        mockMvc.perform(get("/media/images/media-1"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("Unexpected error"));
+    }
 
 }

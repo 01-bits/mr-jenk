@@ -46,14 +46,7 @@ public class ProfileController {
 
         List<MultipartFile> body = List.of(file);
 
-        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-
         try {
-            // If your MediaService is configured to return a direct List instead of
-            // ResponseEntity
             List<MediaResponse> responseBody = mediaFeignClient.upload(body, null);
 
             if (responseBody == null || responseBody.isEmpty()) {
@@ -67,9 +60,6 @@ public class ProfileController {
             return ResponseEntity.ok(Map.of("MediaId", responseBody.getFirst().id()));
 
         } catch (FeignException e) {
-            System.out.println(
-                    "#################################### Caught Feign Exception ####################################");
-
             // Extract the original status code (e.g., 400) and error message/body from the
             // media service
             int status = e.status();
