@@ -72,7 +72,7 @@ public class HeaderAuthFilterTest {
         Authentication auth = runFilter();
 
         assertNotNull(auth);
-        assertEquals("seller-", auth.getName());
+        assertEquals("seller-1", auth.getName());
         assertEquals(List.of(Role.SELLER.toAuthority()), authoritiesOf(auth));
         assertRequestContinued();
     }
