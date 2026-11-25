@@ -3,7 +3,10 @@ package com.buy01.user.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.naming.AuthenticationException;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -22,13 +25,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler (FeignException.class)
-    public ResponseEntity<ProblemDetail> handleNotFound(FeignException ex) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pd);
-    }
-
 
     @ExceptionHandler({ ResourceNotFoundException.class })
     public ResponseEntity<ProblemDetail> handleNotFound(RuntimeException ex) {
@@ -55,6 +51,28 @@ public class GlobalExceptionHandler {
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<Object> handleFeign(FeignException ex) {
+        int status = ex.status();
+        // 4xx from media-service (bad file type, too large...): pass its answer to the
+        // client
+        if (status >= 400 && status < 500) {
+            return ResponseEntity.status(status)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(ex.contentUTF8());
+        }
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
+                "Media service unavailable");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(pd);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ProblemDetail> handleBadCredentials(AuthenticationException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED,
+                "Invalid credentials: email or password is incorrect.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd);
     }
 
     @ExceptionHandler({ HttpMessageNotReadableException.class, UsernameNotFoundException.class })
