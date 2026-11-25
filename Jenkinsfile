@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     stages {
-        stage('Hello') {
-            steps {
-                echo 'test ffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-                sleep(10)
+        stage("Ckeck tool") {
+            steps{
+                sh 'java -version'
             }
         }
 
