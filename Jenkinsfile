@@ -20,18 +20,6 @@ pipeline {
         }
 
         stage('Test product-service') {
-            steps {
-                dir('backend/product-service') {
-                    sh 'chmod +x gradlew'
-                    sh './gradlew clean test --no-daemon'
-                }
-            }
-            post {
-                always {
-                    junit 'backend/product-service/build/test-results/test/*.xml'
-                }
-            }
-
             steps{
                 script {
                     for (svc in SERVICES) {
