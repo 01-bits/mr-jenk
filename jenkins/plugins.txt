@@ -7,3 +7,4 @@ workflow-aggregator
 workflow-multibranch
 github
 dark-theme
+junit
