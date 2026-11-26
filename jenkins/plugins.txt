@@ -1,3 +1,4 @@
+junit
 ansicolor
 configuration-as-code
 github-branch-source
@@ -7,4 +8,3 @@ workflow-aggregator
 workflow-multibranch
 github
 dark-theme
-junit
