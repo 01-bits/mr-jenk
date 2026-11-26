@@ -19,12 +19,12 @@ pipeline {
             }
         }
 
-        stage('Test product-service') {
+        stage('Unit tests') {
             steps{
                 script {
                     for (svc in SERVICES) {
                         def tool = TOOLS[svc.tool]
-                        def path = "backend/${svc.reports}"
+                        def path = "backend/${tool.reports}"
 
                         stage("Test ${svc.name}") {
                             try {
