@@ -14,7 +14,7 @@ down:
 	$(RUN) down $(SERVICES)
 
 build:
-	$(RUN) up -d --build $(SERVICES)
+	$(RUN) up -d --build --no-cache $(SERVICES)
 
 restart: down up
 
