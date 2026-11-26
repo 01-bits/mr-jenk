@@ -45,7 +45,7 @@ public class ProductClientTest {
 
         assertDoesNotThrow(() -> client.assertOwnedBy("product-1", "seller-1"));
 
-        verify(api).owner("product-");
+        verify(api).owner("product-1");
     }
 
     // ---------- reported as 404 ----------
