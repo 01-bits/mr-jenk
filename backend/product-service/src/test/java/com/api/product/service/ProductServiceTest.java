@@ -198,7 +198,7 @@ public class ProductServiceTest {
 
         String owner = productService.ownerOf("product-1");
 
-        assertEquals(owner, "seller-");
+        assertEquals(owner, "seller-1");
     }
 
     @Test

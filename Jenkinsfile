@@ -15,11 +15,11 @@ pipeline {
                     sh './gradlew clean test --no-daemon'
                 }
             }
-            // post{
-            //     always {
-            //         junit 'backend/product-service/build/test-results/test/*.xml'
-            //     }
-            // }
+            post{
+                always {
+                    junit 'backend/product-service/build/test-results/test/*.xml'
+                }
+            }
         }
 
 
