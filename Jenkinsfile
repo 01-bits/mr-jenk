@@ -5,8 +5,8 @@ def SERVICES = [
 ]
 
 def TOOLS = [
-    gradle: [wrapper: './gradlew', test: './gradlew clean test --no-daemon', reports: 'build/test-results/test/*.xml'],
-    maven:  [wrapper: './mvnw',    test: './mvnw -B clean test',          reports: 'target/surefire-reports/*.xml'],
+    gradle: [wrapper: 'gradlew', test: './gradlew clean test --no-daemon', reports: 'build/test-results/test/*.xml'],
+    maven:  [wrapper: 'mvnw',    test: './mvnw -B clean test',          reports: 'target/surefire-reports/*.xml'],
 ]
 
 pipeline {
@@ -24,7 +24,7 @@ pipeline {
                 script {
                     for (svc in SERVICES) {
                         def tool = TOOLS[svc.tool]
-                        def path = "backend/${tool.reports}"
+                        def path = "backend/${svc.name}"
 
                         stage("Test ${svc.name}") {
                             try {
